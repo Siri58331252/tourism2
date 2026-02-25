@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
 from flask import Flask, render_template, redirect, request, send_file, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from sqlalchemy import or_
+from flask import Flask, render_template, request, flash, redirect, url_for
+from flask_mail import Mail, Message
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash # ✅ เพิ่มระบบเข้ารหัสรหัสผ่าน
 from flask_migrate import Migrate
@@ -26,7 +28,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tourism.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # ✅ จำกัดขนาดไฟล์อัปโหลดสูงสุดที่ 16MB
-
+# --- ตั้งค่าการส่งอีเมล (ตัวอย่างสำหรับ Gmail) ---
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False # <--- ต้องเป็น False
+app.config['MAIL_USERNAME'] = '676051000369@mail.rmutk.ac.th'  # อีเมลของคุณ
+app.config['MAIL_PASSWORD'] = 'jgjixdyujqtagndb'     # App Password 16 หลักจาก Google
+mail = Mail(app)
 db.init_app(app)
 migrate = Migrate(app, db)
 
@@ -103,6 +112,9 @@ with app.app_context():
 
     db.session.commit()
 
+
+
+
 # ==================================================
 # LOGIN MANAGER
 # ==================================================
@@ -171,12 +183,58 @@ def toggle_place_status(place_id):
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
-        email = request.form.get('email')
-        # โค้ดสำหรับตรวจสอบอีเมล และส่งลิงก์/รหัส OTP รีเซ็ตรหัสผ่านไปที่อีเมล
-        flash('หากอีเมลนี้มีอยู่ในระบบ เราได้ส่งลิงก์รีเซ็ตรหัสผ่านไปให้แล้ว', 'info')
-        return redirect(url_for('login'))
+        email = request.form.get('email') # ดึงค่าจาก name="email" ใน HTML
+        print(f"DEBUG: กำลังตรวจสอบอีเมล -> {email}") # <--- เพิ่มบรรทัดนี้
+        # 1. ค้นหา User ในฐานข้อมูล
+        user = User.query.filter_by(email=email).first()
         
-    return render_template('forgot_password.html') # ต้องสร้างหน้านี้เพิ่ม
+        if user:
+            print(f"DEBUG: พบผู้ใช้ -> {user.username}") # <--- เพิ่มบรรทัดนี้
+            msg = Message(
+                "รีเซ็ตรหัสผ่านของคุณ - My Tourism App",
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[email]
+            )
+            
+            # เนื้อหาอีเมล
+            msg.body = f"สวัสดีคุณ {user.username},\n\nคุณได้รับอีเมลนี้เพราะมีการขอรีเซ็ตรหัสผ่าน หากคุณไม่ได้เป็นคนทำ โปรดเพิกเฉยต่ออีเมลนี้\n\nคลิกลิงก์ด้านล่างเพื่อตั้งรหัสผ่านใหม่:\nhttp://127.0.0.1:5000/reset-password/token_test"
+            
+            try:
+                mail.send(msg)
+                flash('ระบบได้ส่งลิงก์รีเซ็ตรหัสผ่านไปที่อีเมลของคุณแล้ว!', 'success')
+                return redirect(url_for('login'))
+            except Exception as e:
+                # ถ้าส่งไม่สำเร็จ จะเด้ง Error มาบอก (เช่น รหัสผ่าน App Password ผิด)
+                flash(f'เกิดข้อผิดพลาดในการส่งอีเมล: {str(e)}', 'danger')
+        else:
+            # ถ้าไม่เจอเมลในระบบ
+            print("DEBUG: ไม่พบอีเมลนี้ใน Database") # <--- เพิ่มบรรทัดนี้
+            flash('ไม่พบอีเมลนี้ในระบบสมาชิก', 'warning')
+            
+    return render_template('forgot_password.html')
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    # ในขั้นตอนนี้เราใช้ token_test แบบง่ายๆ ไปก่อน
+    if request.method == 'POST':
+        new_password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if new_password != confirm_password:
+            flash("รหัสผ่านไม่ตรงกัน", "danger")
+            return redirect(request.url)
+        
+        # ค้นหา user (ตัวอย่างนี้เราจะเปลี่ยนให้ admin เพราะเรายังไม่ได้ทำระบบ token จริงจัง)
+        # หมายเหตุ: ในระบบจริงต้องใช้ token ค้นหา user จาก DB
+        user = User.query.filter_by(username='admin11').first() 
+        
+        if user:
+            user.password = generate_password_hash(new_password)
+            db.session.commit()
+            flash("เปลี่ยนรหัสผ่านใหม่เรียบร้อยแล้ว! กรุณาเข้าสู่ระบบ", "success")
+            return redirect(url_for('login'))
+            
+    return render_template('reset_password.html', token=token)
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
