@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
 <style>
   /* โทนสีและโครงสร้างหลัก */
@@ -7,6 +8,25 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+  }
+
+  /* สไตล์สำหรับแผนที่ Leaflet */
+  #detail-map {
+    height: 350px;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    z-index: 1; /* ป้องกันไม่ให้แผนที่ทับเมนูหรือปุ่มอื่นๆ */
+  }
+
+  .map-section {
+    margin-top: 30px;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    margin-bottom: 40px;
   }
 
   .top-section {
@@ -89,7 +109,7 @@
 
   .thumb-list img.active {
     opacity: 1;
-    border-color: #4b5563; /* สีเทาเข้ม */
+    border-color: #4b5563;
   }
 
   /* ข้อมูลสถานที่ */
@@ -165,7 +185,6 @@
     font-weight: 600;
   }
 
-  
   .user-comment-list {
     margin-bottom: 30px;
   }
@@ -174,7 +193,7 @@
     background: #f9fafb;
     padding: 16px 20px;
     border-radius: 6px;
-    border-left: 4px solid #9ca3af; /* ขีดเส้นขอบสีเทา */
+    border-left: 4px solid #9ca3af;
     margin-bottom: 12px;
   }
 
@@ -235,13 +254,12 @@
 
   /* จำกัดความสูงของพื้นที่แสดงความคิดเห็น */
   .comment-scroll-area {
-    max-height: 500px; /* กำหนดความสูงสูงสุด (ปรับตัวเลขได้ตามต้องการ) */
-    overflow-y: auto;  /* ให้แสดงแถบเลื่อนแนวตั้งเมื่อเนื้อหาเกิน */
+    max-height: 500px;
+    overflow-y: auto;
     padding-right: 15px;
     margin-bottom: 20px;
   }
 
-  /* ตกแต่งแถบเลื่อนให้ดูเรียบหรูและทันสมัย */
   .comment-scroll-area::-webkit-scrollbar {
     width: 6px;
   }
@@ -256,6 +274,7 @@
   .comment-scroll-area::-webkit-scrollbar-thumb:hover {
     background: #9ca3af;
   }
+
   /* ฟอร์มแสดงความคิดเห็น */
   .comment-form-box {
     background: #f9fafb;
@@ -346,8 +365,6 @@
     transition: all 0.2s ease;
   }
 
-  
-
   .back-btn:hover {
     background: #f3f4f6;
   }
@@ -369,11 +386,11 @@
 
       {# ===== สร้างรายการรูป ===== #}
       {% if place.images and place.images|length > 0 %}
-      {% set all_images = place.images | map(attribute='image_path') | list %}
+        {% set all_images = place.images | map(attribute='image_path') | list %}
       {% elif place.image %}
-      {% set all_images = place.image.split(',') %}
+        {% set all_images = place.image.split(',') %}
       {% else %}
-      {% set all_images = [] %}
+        {% set all_images = [] %}
       {% endif %}
 
       {% if all_images|length > 0 %}
@@ -423,8 +440,21 @@
     </div>
   </div>
 
+  <div class="map-section">
+    <h3 class="section-title" style="border-bottom: none; margin-bottom: 10px; padding-bottom: 0;">
+      📍 พิกัดสถานที่
+    </h3>
+    {% if place.latitude and place.longitude %}
+        <div id="detail-map"></div>
+    {% else %}
+        <div style="padding: 30px; text-align: center; background: #f9fafb; border-radius: 8px; color: #6b7280;">
+            <p class="italic">ไม่ได้ระบุพิกัดบนแผนที่สำหรับสถานที่นี้</p>
+        </div>
+    {% endif %}
+  </div>
+
   <div class="review-section">
-    <h3 class="section-title">ความคิดเห็น</h3>
+    <h3 class="section-title">ความคิดเห็นและการรีวิว</h3>
 
     {% if place.comments %}
     <div class="user-comment-list">
@@ -492,14 +522,17 @@
   </div>
   {% endif %}
 
-  <div>
+  <div style="margin-bottom: 40px;">
     <a href="{{ url_for('index') }}" class="back-btn">&larr; กลับสู่หน้าหลัก</a>
   </div>
 
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+    
+    // --- ส่วนจัดการรูปภาพ (Image Slider) ---
     let images = [
       {% for img in all_images %}
       "{{ url_for('static', filename='uploads/' ~ img) }}"{% if not loop.last %}, {% endif %}
@@ -537,7 +570,7 @@
 
     function startAuto() {
       if (images.length > 1) {
-        timer = setInterval(nextImage, 5000); // ปรับเวลาสไลด์รูปให้ช้าลงเล็กน้อย (5 วินาที) เพื่อความละมุนตา
+        timer = setInterval(nextImage, 5000);
       }
     }
 
@@ -547,6 +580,32 @@
     }
 
     startAuto();
+
+    // --- ส่วนจัดการแผนที่ (Leaflet Map) ---
+    const lat = {{ place.latitude if place.latitude else 0 }};
+    const lng = {{ place.longitude if place.longitude else 0 }};
+
+    // เช็คว่ามีพิกัดจริงและมี div ของแผนที่อยู่ (ป้องกัน Error ถ้าไม่มีพิกัด)
+    if (lat !== 0 && lng !== 0 && document.getElementById('detail-map')) {
+        const map = L.map('detail-map').setView([lat, lng], 14);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // ปักหมุดพร้อมแสดงชื่อสถานที่
+        const marker = L.marker([lat, lng]).addTo(map)
+            .bindPopup("<b style='font-size:14px; color:#111827;'>{{ place.name }}</b>")
+            .openPopup();
+            
+        // วาดวงกลมรอบๆ หมุดเพื่อความสวยงาม (Optional)
+        L.circle([lat, lng], {
+            color: '#3b82f6',
+            fillColor: '#3b82f6',
+            fillOpacity: 0.1,
+            radius: 500
+        }).addTo(map);
+    }
   });
 </script>
 

@@ -99,47 +99,59 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 text-gray-700">
-                    {% for place in places %}
-                    <tr class="hover:bg-blue-50/30 transition">
-                        <td class="px-6 py-4 font-medium max-w-[200px] truncate" title="{{ place.name }}">
-                            {{ place.name }}
-                        </td>
-                        <td class="px-6 py-4 text-sm italic text-gray-500">
-                            {{ place.category.name }}
-                        </td>
-                        <td class="px-6 py-4 text-sm">
-                            {{ place.province.name }}
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            {% if place.approved %}
-                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">อนุมัติแล้ว</span>
-                            {% else %}
-                            <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">รออนุมัติ</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4 text-right space-x-2 whitespace-nowrap">
-                            <a href="/place/{{ place.id }}/edit" 
-                               class="inline-block bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-50 transition shadow-sm">
-                                แก้ไข/ดู
-                            </a>
+    {% for place in places %}
+    <tr class="hover:bg-blue-50/30 transition {{ 'opacity-60 bg-gray-50' if not place.is_active else '' }}">
+        <td class="px-6 py-4 font-medium max-w-[200px] truncate" title="{{ place.name }}">
+            {{ place.name }}
+            {% if not place.is_active %}
+                <span class="block text-[10px] text-gray-400 uppercase font-bold">Inactive</span>
+            {% endif %}
+        </td>
+        <td class="px-6 py-4 text-sm italic text-gray-500">
+            {{ place.category.name }}
+        </td>
+        <td class="px-6 py-4 text-sm">
+            {{ place.province.name }}
+        </td>
+        <td class="px-6 py-4 text-center">
+            {% if place.approved %}
+                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">อนุมัติแล้ว</span>
+            {% else %}
+                <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">รออนุมัติ</span>
+            {% endif %}
+        </td>
+        <td class="px-6 py-4 text-right space-x-2 whitespace-nowrap">
+            <a href="/place/{{ place.id }}/edit" 
+               class="inline-block bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-50 transition shadow-sm">
+                แก้ไข/ดู
+            </a>
 
-                            {% if not place.approved %}
-                            <a href="/approve/{{ place.id }}" 
-                               class="inline-block bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-700 transition shadow-sm">
-                                อนุมัติ
-                            </a>
-                            {% endif %}
+            {% if not place.approved %}
+            <a href="/approve/{{ place.id }}" 
+               class="inline-block bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-700 transition shadow-sm">
+                อนุมัติ
+            </a>
+            {% endif %}
 
-                            <form action="/admin/place/{{ place.id }}/delete" method="post" class="inline-block"
-                                  onsubmit="return confirmDelete(this, 'ลบสถานที่ {{ place.name }}?')">
-                                <button type="submit" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-600 hover:text-white transition shadow-sm">
-                                    ลบ
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
+            <form action="/admin/place/{{ place.id }}/toggle-status" method="post" class="inline-block">
+                {% if place.is_active %}
+                <button type="submit" 
+                        onclick="return confirmStatus(event, this, 'ปิดการใช้งานสถานที่นี้? คนทั่วไปจะไม่เห็นสถานที่นี้ในระบบ')"
+                        class="bg-amber-50 text-amber-600 border border-amber-200 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-amber-600 hover:text-white transition shadow-sm">
+                    ปิดใช้งาน
+                </button>
+                {% else %}
+                <button type="submit" 
+                        onclick="return confirmStatus(event, this, 'เปิดการใช้งานสถานที่นี้อีกครั้ง?')"
+                        class="bg-green-50 text-green-600 border border-green-200 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-green-600 hover:text-white transition shadow-sm">
+                    เปิดใช้งาน
+                </button>
+                {% endif %}
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
             </table>
         </div>
     </section>
@@ -183,6 +195,28 @@
         });
         return false; // ป้องกัน Form Submit แบบปกติ
     }
+    // ฟังก์ชันยืนยันการเปิด/ปิดสถานะ
+function confirmStatus(event, button, message) {
+    event.preventDefault(); // หยุดการส่งฟอร์มทันที
+    const form = button.closest('form');
+    
+    Swal.fire({
+        title: 'ยืนยันการเปลี่ยนสถานะ?',
+        text: message,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#2563eb',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'ยืนยัน',
+        cancelButtonText: 'ยกเลิก',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit();
+        }
+    });
+    return false;
+}
 </script>
 
 <style>
