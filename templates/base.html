@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Tourism Information System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+    <nav class="bg-black text-white px-6 py-6 flex items-center
+            sticky top-0 z-50 backdrop-blur-md shadow-md">
+
+        <!-- ฝั่งซ้าย -->
+        <a href="/" class="font-semibold text-lg">เที่ยวสู้ไทย</a>
+
+        <!-- ฝั่งขวา -->
+        <div class="ml-auto flex gap-5 items-center">
+
+            <a href="/" class="hover:text-yellow-400">หน้าแรก</a>
+
+            {% if current_user.is_authenticated %}
+
+            {% if current_user.role == 'member' %}
+            <a href="/my-places">ประวัติการแนะนำสถานที่</a>
+            <a href="/add_place">แนะนำสถานที่</a>
+            <a href="/profile" class="text-yellow-400 font-semibold hover:underline">Member ({{ current_user.username }})</a>
+            {% endif %}
+
+            {% if current_user.role == 'admin' %}
+            <a href="/admin/manage">จัดการสถานที่</a>
+            <a href="/users">จัดการผู้ใช้งาน</a>
+            <a href="/admin" class="text-yellow-400 font-semibold">Admin</a>
+            {% endif %}
+
+            {% if current_user.role == 'moderator' %}
+            <a href="/moderator/members">จัดการสมาชิก</a>
+            <a href="/moderator/logs">ประวัติระบบ</a>
+            <a href="/moderator" class="text-yellow-400 font-semibold">ผู้ดูแลระบบ</a>
+            {% endif %}
+
+            <a href="/logout" class="text-red-300 hover:text-red-400">
+                ออกจากระบบ
+            </a>
+
+            {% else %}
+
+            <a href="/login" class="hover:text-yellow-400">
+                เข้าสู่ระบบ
+            </a>
+
+            {% endif %}
+
+        </div>
+
+    </nav>
+
+
+
+    <div>
+        {% block content %}{% endblock %}
+    </div>
+
+</body>
+
+</html>

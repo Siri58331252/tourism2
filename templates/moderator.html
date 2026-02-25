@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+
+    <h1 class="text-3xl font-bold text-gray-800 border-l-4 border-purple-600 pl-4 mb-8">
+        🛡️ แผนควบคุมผู้ดูแลระบบ
+    </h1>
+
+    <!-- ===== สถิติ ===== -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+
+        <!-- สมาชิกทั้งหมด -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-600">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">สมาชิกทั้งหมด</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ total_users }}</p>
+                </div>
+                <div class="text-4xl text-blue-600">👥</div>
+            </div>
+        </div>
+
+        <!-- สมาชิกที่ใช้งาน -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-600">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">ใช้งาน</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ active_users }}</p>
+                </div>
+                <div class="text-4xl text-green-600">✓</div>
+            </div>
+        </div>
+
+        <!-- สมาชิกที่ปิดใช้งาน -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-600">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">ปิดใช้งาน</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ inactive_users }}</p>
+                </div>
+                <div class="text-4xl text-red-600">✕</div>
+            </div>
+        </div>
+
+        <!-- ประวัติทั้งหมด -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-purple-600">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">ประวัติระบบ</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ total_logs }}</p>
+                </div>
+                <div class="text-4xl text-purple-600">📋</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===== เมนูสำหรับผู้ดูแลระบบ ===== -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- จัดการสมาชิก -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center mb-4">
+                <div class="text-2xl mr-3">👥</div>
+                <h2 class="text-xl font-bold text-gray-900">จัดการสมาชิก</h2>
+            </div>
+            <p class="text-gray-600 text-sm mb-4">
+                ดูรายชื่อสมาชิกและควบคุมการใช้งาน
+            </p>
+            <a href="/moderator/members"
+                class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition font-medium">
+                จัดการสมาชิก
+            </a>
+        </div>
+
+        <!-- ประวัติการใช้งาน -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center mb-4">
+                <div class="text-2xl mr-3">📋</div>
+                <h2 class="text-xl font-bold text-gray-900">ประวัติการใช้งาน</h2>
+            </div>
+            <p class="text-gray-600 text-sm mb-4">
+                ดูประวัติผู้ใช้ตามช่วงเวลาที่เลือก
+            </p>
+            <a href="/moderator/logs"
+                class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition font-medium">
+                ดูประวัติ
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold text-gray-800 mb-8">✏️ แก้ไขข้อมูลสมาชิก (โหมด Admin)</h1>
+
+    <div class="bg-white rounded-lg shadow p-8">
+        <form method="POST" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อผู้ใช้ (Username)</label>
+                    <input type="text" name="username" value="{{ user.username }}" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">นามสกุล (Surname)</label>
+                    <input type="text" name="surname" value="{{ user.surname if user.surname else '' }}" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">อีเมล</label>
+                <input type="email" name="email" value="{{ user.email if user.email else '' }}" 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+            </div>
+
+            <div class="bg-amber-50 p-6 rounded-lg border border-amber-100 space-y-4">
+    <label class="block text-sm font-bold text-amber-800 mb-2">🔑 เปลี่ยนรหัสผ่านใหม่</label>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label class="block text-xs text-amber-700 mb-1">รหัสผ่านใหม่</label>
+            <input type="password" name="password" id="password" placeholder="เว้นว่างไว้หากไม่เปลี่ยน"
+                   class="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none">
+        </div>
+        <div>
+            <label class="block text-xs text-amber-700 mb-1">ยืนยันรหัสผ่านใหม่</label>
+            <input type="password" name="confirm_password" id="confirm_password" placeholder="กรอกรหัสผ่านอีกครั้ง"
+                   class="w-full px-4 py-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none">
+        </div>
+    </div>
+    <p id="password-msg" class="text-xs mt-2 hidden"></p>
+  
+</div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">สิทธิ์การใช้งาน</label>
+                    <select name="role" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                        <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                        <option value="moderator" {% if user.role == 'moderator' %}selected{% endif %}>ผู้ดูแลระบบ (Moderator)</option>
+                        <option value="member" {% if user.role == 'member' %}selected{% endif %}>สมาชิก (Member)</option>
+                    </select>
+                </div>
+                <div class="flex items-center pt-6">
+                    <label class="flex items-center space-x-3 cursor-pointer">
+                        <input type="checkbox" name="is_active" {% if user.is_active %}checked{% endif %} 
+                               class="w-5 h-5 text-blue-600 rounded">
+                        <span class="text-gray-700 font-medium">เปิดใช้งานบัญชีนี้</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex gap-4 pt-6 border-t">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition shadow-md">
+                    💾 บันทึกการแก้ไข
+                </button>
+                <a href="{{ url_for('admin_users') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium">
+                    ยกเลิก
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+<script>
+    const pwd = document.getElementById('password');
+    const pwdConfirm = document.getElementById('confirm_password');
+    const msg = document.getElementById('password-msg');
+
+    function validatePassword() {
+        if (pwd.value !== pwdConfirm.value && pwdConfirm.value !== '') {
+            msg.textContent = '❌ รหัสผ่านไม่ตรงกัน';
+            msg.className = 'text-xs mt-2 text-red-600';
+            msg.classList.remove('hidden');
+        } else if (pwd.value === pwdConfirm.value && pwd.value !== '') {
+            msg.textContent = '✅ รหัสผ่านตรงกัน';
+            msg.className = 'text-xs mt-2 text-green-600';
+            msg.classList.remove('hidden');
+        } else {
+            msg.classList.add('hidden');
+        }
+    }
+
+    pwd.addEventListener('input', validatePassword);
+    pwdConfirm.addEventListener('input', validatePassword);
+</script>
