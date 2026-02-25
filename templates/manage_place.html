@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="max-w-6xl mx-auto p-6 space-y-10">
+
+    <h1 class="text-2xl font-bold">📍 จัดการข้อมูลระบบ</h1>
+
+    <!-- ================== CATEGORY ================== -->
+    <section class="bg-white p-6 rounded shadow">
+        <h2 class="text-xl font-semibold mb-4">🗂 หมวดหมู่</h2>
+
+        <form method="post" action="/admin/category" class="flex gap-2 mb-4">
+            <input name="name" placeholder="ชื่อหมวดหมู่" class="border px-3 py-2 rounded w-64" required>
+            <button class="bg-blue-600 text-white px-4 rounded">เพิ่ม</button>
+        </form>
+
+        <ul class="space-y-2">
+            {% for c in categories %}
+            <li class="flex gap-2 items-center">
+                <form method="post" action="/admin/category/{{ c.id }}/edit" class="flex gap-2">
+                    <input name="name" value="{{ c.name }}" class="border px-2 py-1 rounded">
+                    <button class="bg-yellow-500 text-white px-2 rounded">แก้ไข</button>
+                </form>
+
+                <form method="post" action="/admin/category/{{ c.id }}/delete"
+                    onsubmit="return confirm('ลบหมวดหมู่นี้?')">
+                    <button class="bg-red-600 text-white px-2 rounded">ลบ</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+
+    </section>
+
+    <!-- ================== PROVINCE ================== -->
+    <section class="bg-white p-6 rounded shadow">
+        <h2 class="text-xl font-semibold mb-4">🏙 จังหวัด</h2>
+
+        <form method="post" action="/admin/province" class="flex gap-2 mb-4">
+            <input name="name" placeholder="ชื่อจังหวัด" class="border px-3 py-2 rounded w-64" required>
+            <button class="bg-green-600 text-white px-4 rounded">เพิ่ม</button>
+        </form>
+
+        <ul class="space-y-2">
+            {% for p in provinces %}
+            <li class="flex gap-2 items-center">
+                <form method="post" action="/admin/province/{{ p.id }}/edit" class="flex gap-2">
+                    <input name="name" value="{{ p.name }}" class="border px-2 py-1 rounded">
+                    <button class="bg-yellow-500 text-white px-2 rounded">แก้ไข</button>
+                </form>
+
+                <form method="post" action="/admin/province/{{ p.id }}/delete"
+                    onsubmit="return confirm('ลบจังหวัดนี้?')">
+                    <button class="bg-red-600 text-white px-2 rounded">ลบ</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+
+    </section>
+
+    <!-- ================== PLACE ================== -->
+    <section class="bg-white p-6 rounded shadow">
+        <h2 class="text-xl font-semibold mb-4">📌 สถานที่ท่องเที่ยว</h2>
+
+        <table class="w-full border">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="border px-2 py-1">ชื่อ</th>
+                    <th class="border px-2 py-1">หมวดหมู่</th>
+                    <th class="border px-2 py-1">จังหวัด</th>
+                    <th class="border px-2 py-1">สถานะ</th>
+                    <th class="border px-2 py-1">จัดการ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for place in places %}
+                <tr>
+                    <td class="border px-2 py-1">{{ place.name }}</td>
+                    <td class="border px-2 py-1">{{ place.category.name }}</td>
+                    <td class="border px-2 py-1">{{ place.province.name }}</td>
+                    <td class="border px-2 py-1">
+                        {% if place.approved %}
+                        <span class="text-green-600">อนุมัติแล้ว</span>
+                        {% else %}
+                        <span class="text-red-600">รออนุมัติ</span>
+                        {% endif %}
+                    </td>
+                    <td class="border px-2 py-1 space-x-1">
+                        <a href="/place/{{ place.id }}/edit" class="bg-yellow-500 text-white px-2 py-1 rounded text-sm">
+                            ดู
+                        </a>
+
+                        <form action="/admin/place/{{ place.id }}/delete" method="post" style="display:inline"
+                            onsubmit="return confirm('ลบสถานที่นี้?')">
+                            <button class="bg-red-600 text-white px-2 py-1 rounded text-sm">
+                                ลบ
+                            </button>
+                        </form>
+
+                        {% if not place.approved %}
+                        <a href="/approve/{{ place.id }}" class="bg-blue-500 text-white px-2 py-1 rounded text-sm">
+                            อนุมัติ
+                        </a>
+                        {% endif %}
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+</div>
+
+{% endblock %}

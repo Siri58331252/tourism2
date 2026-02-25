@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+
+    <h1 class="text-3xl font-bold text-gray-800 border-l-4 border-blue-600 pl-4 mb-8">
+        📊 Admin Dashboard
+    </h1>
+
+    <!-- ===== สถิติ ===== -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+
+        <!-- สถานที่ทั้งหมด -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-600">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">สถานที่ทั้งหมด</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ total_places }}</p>
+                </div>
+                <div class="text-4xl text-blue-600">📍</div>
+            </div>
+        </div>
+
+        <!-- สถานที่ที่อนุมัติ -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-600">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">อนุมัติแล้ว</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ approved_places }}</p>
+                </div>
+                <div class="text-4xl text-green-600">✓</div>
+            </div>
+        </div>
+
+        <!-- สถานที่รออนุมัติ -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-yellow-600">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">รออนุมัติ</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ pending_places }}</p>
+                </div>
+                <div class="text-4xl text-yellow-600">⏳</div>
+            </div>
+        </div>
+
+        <!-- ผู้ใช้ทั้งหมด -->
+        <div class="bg-white rounded-lg shadow p-6 border-l-4 border-purple-600">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">ผู้ใช้ทั้งหมด</p>
+                    <p class="text-3xl font-bold text-gray-900">{{ total_users }}</p>
+                </div>
+                <div class="text-4xl text-purple-600">👥</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===== เมนูสำหรับ Admin ===== -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- การจัดการสถานที่ -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center mb-4">
+                <div class="text-2xl mr-3">📌</div>
+                <h2 class="text-xl font-bold text-gray-900">จัดการสถานที่</h2>
+            </div>
+            <p class="text-gray-600 text-sm mb-4">
+                อนุมัติ แก้ไข ลบ ข้อมูลสถานที่ท่องเที่ยว
+            </p>
+            <a href="/admin/manage"
+                class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition font-medium">
+                เข้าสู่ระบบจัดการ
+            </a>
+        </div>
+
+        <!-- การจัดการผู้ใช้ -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center mb-4">
+                <div class="text-2xl mr-3">👥</div>
+                <h2 class="text-xl font-bold text-gray-900">จัดการผู้ใช้งาน</h2>
+            </div>
+            <p class="text-gray-600 text-sm mb-4">
+                กำหนดสิทธิ์ผู้ใช้งาน และควบคุมการเข้าถึงระบบ
+            </p>
+            <a href="/users"
+                class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition font-medium">
+                จัดการผู้ใช้งาน
+            </a>
+        </div>
+
+        <!-- รายงาน -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center mb-4">
+                <div class="text-2xl mr-3">📊</div>
+                <h2 class="text-xl font-bold text-gray-900">ส่งออกรายงาน</h2>
+            </div>
+            <p class="text-gray-600 text-sm mb-4">
+                ส่งออกข้อมูลสถานที่เป็นไฟล์ CSV
+            </p>
+            <a href="/report"
+                class="inline-block bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition font-medium">
+                ส่งออกรายงาน
+            </a>
+        </div>
+
+        <!-- สำเร็จนี้ -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center mb-4">
+                <div class="text-2xl mr-3">📈</div>
+                <h2 class="text-xl font-bold text-gray-900">ความก้าวหน้า</h2>
+            </div>
+            <p class="text-gray-600 text-sm mb-4">
+                อัตราการอนุมัติ:
+                <span class="font-bold text-lg">
+                    {% if total_places > 0 %}
+                    {{ ((approved_places / total_places) * 100) | round(1) }}%
+                    {% else %}
+                    N/A
+                    {% endif %}
+                </span>
+            </p>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-blue-600 h-2 rounded-full"
+                    style="width: {% if total_places > 0 %}{{ (approved_places / total_places) * 100 }}{% else %}0{% endif %}%">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

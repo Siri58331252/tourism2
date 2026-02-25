@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 border-l-4 border-blue-600 pl-4">
+            ประวัติการแนะนำสถานที่
+        </h1>
+        <a href="/" class="text-blue-600 hover:text-blue-800 font-medium">← กลับหน้าแรก</a>
+    </div>
+
+    {% if recommends %}
+    <div class="space-y-4">
+        {% for rec in recommends %}
+        <div class="bg-white border border-gray-200 rounded-lg shadow p-6 hover:shadow-lg transition">
+            <div class="flex justify-between items-start">
+                <div class="flex-1">
+                    <a href="/place/{{ rec.place.id }}" class="text-xl font-bold text-gray-900 hover:text-blue-600">
+                        {{ rec.place.name }}
+                    </a>
+
+                    <p class="text-sm text-gray-500 mt-1">
+                        📍 {{ rec.place.province.name if rec.place.province else '-' }} • 📂 {{ rec.place.category.name
+                        if rec.place.category else '-' }}
+                    </p>
+
+                    {% if rec.title %}
+                    <p class="text-lg font-semibold text-blue-600 mt-3">
+                        {{ rec.title }}
+                    </p>
+                    {% endif %}
+
+                    <p class="text-gray-700 mt-2 line-clamp-3">
+                        {{ rec.content }}
+                    </p>
+
+                    {% if rec.image %}
+                    <img src="{{ url_for('static', filename='uploads/' ~ rec.image) }}" alt="{{ rec.title }}"
+                        class="w-32 h-24 object-cover rounded mt-3">
+                    {% endif %}
+
+                    <p class="text-xs text-gray-400 mt-4">
+                        📅 {{ rec.created_at.strftime('%d/%m/%Y %H:%M') if rec.created_at else 'ไม่ระบุวันที่' }}
+                    </p>
+                </div>
+
+                <div class="ml-4 flex-shrink-0">
+                    {% if rec.approved %}
+                    <span
+                        class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium block text-center">
+                        ✓ อนุมัติแล้ว
+                    </span>
+                    {% else %}
+                    <span
+                        class="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-sm font-medium block text-center">
+                        ⏳ รออนุมัติ
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-16 bg-gray-50 rounded-lg border border-gray-200">
+        <p class="text-gray-500 text-lg mb-4">
+            ยังไม่มีประวัติการแนะนำสถานที่
+        </p>
+        <p class="text-gray-400 text-sm mb-6">
+            เมื่อมีคนแนะนำสถานที่ของคุณ จะแสดงที่นี่
+        </p>
+        <a href="/"
+            class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition font-medium">
+            ดูสถานที่ท่องเที่ยว
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen relative flex items-center justify-center px-4
+            bg-cover bg-center" style="background-image: url('/static/bg.jpg');">
+
+    <!-- ชั้นเบลอพื้นหลัง -->
+    <div class="absolute inset-0 bg-black/30 "></div>
+
+    <!-- กล่อง login (ไม่เบลอ) -->
+    <div class="relative z-10 max-w-md w-full bg-black/70 backdrop-blur-lg
+                rounded-xl shadow-lg p-8">
+        <h2 class="text-2xl font-bold text-white text-center mb-6">สมัครสมาชิก</h2>
+
+        <form method="POST" class="">
+
+            <div>
+                <label class="block text-sm font-medium text-white mb-1">ชื่อ</label>
+                <input type="text" name="username" required class="w-full px-4 py-2 mb-2 border border-gray-300 rounded-md
+                   focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                   outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-white mb-1">นามสกุล</label>
+                <input type="text" name="last_name" required class="w-full px-4 py-2 mb-2 border border-gray-300 rounded-md
+                   focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                   outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-white mb-1">อีเมล</label>
+                <input type="email" name="email" required class="w-full px-4 mb-2 py-2 border border-gray-300 rounded-md
+                   focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                   outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-white mb-1">รหัสผ่าน</label>
+                <input type="password" name="password" required class="w-full px-4 py-2 mb-4 border border-gray-300 rounded-md
+                   focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                   outline-none transition">
+            </div>
+
+            {% if error %}
+            <p class="text-red-500 text-sm bg-red-50 p-2 rounded
+              border border-red-200 text-center my-3">
+                {{ error }}
+            </p>
+            {% endif %}
+
+            <button type="submit" class="w-full bg-yellow-600 hover:bg-yellow-500
+               text-white font-semibold py-2 rounded-md
+               transition duration-200 mt-4">
+                สมัคร
+            </button>
+
+        </form>
+
+
+        <div class="mt-6 text-center">
+            <span class="text-sm  text-white">ยังไม่มีบัญชี?</span>
+            <a href="/login" class="text-sm text-yellow-600 hover:underline ml-1 font-medium">เข้าสู่ระบบ</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
