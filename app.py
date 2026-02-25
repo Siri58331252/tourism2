@@ -128,7 +128,11 @@ def index():
     provinces = [p.name for p in Province.query.order_by(Province.name).all()]
     categories = [c.name for c in Category.query.order_by(Category.name).all()]
 
-    query = Place.query.filter(Place.approved == True).join(Province).join(Category)
+    # ✅ เพิ่ม Place.is_active == True เข้าไปใน Filter หลัก
+    query = Place.query.filter(
+        Place.approved == True, 
+        Place.is_active == True
+    ).join(Province).join(Category)
 
     if keyword:
         query = query.filter(
@@ -156,6 +160,23 @@ def index():
         selected_province=province,
         selected_category=category
     )
+@app.route('/admin/place/<int:place_id>/toggle-status', methods=['POST'])
+def toggle_place_status(place_id):
+    place = Place.query.get_or_404(place_id)
+    place.is_active = not place.is_active # สลับสถานะ True/False
+    db.session.commit()
+    flash(f'เปลี่ยนสถานะ {place.name} เรียบร้อยแล้ว', 'success')
+    return redirect(url_for('admin_manage'))
+
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        # โค้ดสำหรับตรวจสอบอีเมล และส่งลิงก์/รหัส OTP รีเซ็ตรหัสผ่านไปที่อีเมล
+        flash('หากอีเมลนี้มีอยู่ในระบบ เราได้ส่งลิงก์รีเซ็ตรหัสผ่านไปให้แล้ว', 'info')
+        return redirect(url_for('login'))
+        
+    return render_template('forgot_password.html') # ต้องสร้างหน้านี้เพิ่ม
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required

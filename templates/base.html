@@ -29,6 +29,7 @@
 
             {% if current_user.role == 'admin' %}
             <a href="/admin/manage">จัดการสถานที่</a>
+            <a href="/add_place">แนะนำสถานที่</a>
             <a href="/users">จัดการผู้ใช้งาน</a>
             <a href="/admin" class="text-yellow-400 font-semibold">Admin</a>
             {% endif %}
@@ -64,3 +65,31 @@
 </body>
 
 </html>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // ตั้งค่าพื้นฐานสำหรับ Toast
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end', // ให้เด้งที่มุมขวาบน
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+
+    // ดึง Flash Messages จาก Flask
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          Toast.fire({
+            icon: '{{ "success" if category == "success" else ("error" if category == "danger" else "info") }}',
+            title: '{{ message | safe }}'
+          });
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+</script>

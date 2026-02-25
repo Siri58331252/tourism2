@@ -55,10 +55,10 @@ class Place(db.Model):
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
     image = db.Column(db.String(255), nullable=True)
-    # ✅ เพิ่มบรรทัดนี้เข้าไป เพื่อใช้เช็คสถานะการอนุมัติ
     approved = db.Column(db.Boolean, default=False) 
 
-    # ความสัมพันธ์กับรูปภาพ (ถ้ามี)
+    is_active = db.Column(db.Boolean, default=True) 
+
     images = db.relationship('PlaceImage', backref='place', cascade="all, delete-orphan")
 
 # ------------------ PlaceImage ------------------
